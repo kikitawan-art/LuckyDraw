@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wardah Colour Circuit - Treasure Hunt Gift Board</title>
+    <style>
+        /* =========================================================
+           1. RESET & DESIGN TOKENS (100% MANDIRI TANPA CDN EKSTERNAL)
+           ========================================================= */
+        :root {
+            --pink-light: #ff9ec4;
+            --pink-mid: #f45d96;
+            --pink-deep: #db2777;
+            --pink-dark: #9d174d;
+            --circuit-navy: #0a3868;
+            --circuit-blue: #1b65a6;
+            --circuit-coral: #f25c54;
+            --white: #ffffff;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: radial-gradient(circle at center, #132c4d 0%, #061120 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* =========================================================
+           2. WADAH POSTER UTAMA (RASIO 704:1000, ANTI COLLAPSE DI IFRAME)
+           ========================================================= */
+        #poster-stage {
+            position: relative;
+            width: min(100vw, 70.4vh);
+            height: min(100vh, 142.04vw);
+            max-width: 100%;
+            max-height: 100%;
+            /* Gradien Poster Wardah Colour Circuit (Biru -> Putih -> Coral/Pink) */
+            background: linear-gradient(
+                180deg,
+                #0a3c70 0%,
+                #1b66a6 18%,
+                #5ba4d6 32%,
+                #c3e2f5 48%,
+                #eef7fc 60%,
+                #bce0dc 68%,
+                #f8fafc 73%,
+                #f8a07a 81%,
+                #f2634c 90%,
+                #f58ea2 100%
+            );
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Lapisan Gambar Background Asli dari Folder Image/ */
+        #bg-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: fill;
+            z-index: 1;
+            pointer-events: none;
+            display: none;
+        }
+
+        /* =========================================================
+           3. HEADER POSTER (WARDAH COLOUR CIRCUIT - TREASURE HUNT)
+           ========================================================= */
+        #poster-header {
+            position: relative;
+            z-index: 5;
+            width: 100%;
+            flex: 0 0 auto;
+            padding: 2.2% 4.5% 1.2%;
+            display: flex;
+            flex-direction: column;
+            gap: clamp(3px, 0.6vh, 6px);
+            background: linear-gradient(
+                180deg,
+                rgba(7, 39, 77, 0.94) 0%,
+                rgba(19, 78, 136, 0.85) 62%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+
+        /* Ketika gambar background asli berhasil dimuat, sembunyikan header fallback agar tidak ganda */
+        #poster-stage.has-custom-bg #poster-header {
+            opacity: 0;
+        }
+
+        .header-top-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .wardah-logo {
+            color: #ffffff;
+            font-weight: 300;
+            letter-spacing: 0.04em;
+            font-size: clamp(1.05rem, 2.7vh, 1.9rem);
+            line-height: 1;
+        }
+
+        .checkered-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .checkered-flag {
+            width: clamp(24px, 3.8vh, 36px);
+            height: clamp(16px, 2.5vh, 24px);
+            border-radius: 3px;
+            opacity: 0.9;
+            transform: skewX(-18deg);
+            background-image:
+                linear-gradient(45deg, #fff 25%, transparent 25%),
+                linear-gradient(-45deg, #fff 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #fff 75%),
+                linear-gradient(-45deg, transparent 75%, #fff 75%);
+            background-size: 8px 8px;
+            background-position: 0 0, 0 4px, 4px -4px, -4px 0;
+        }
+
+        .circuit-title-block {
+            text-align: center;
+            line-height: 1;
+        }
+
+        .circuit-main-title {
+            font-weight: 900;
+            font-style: italic;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            font-size: clamp(1.1rem, 2.9vh, 2.1rem);
+            color: #ffffff;
+            text-shadow: 0 2px 8px rgba(5, 24, 52, 0.65);
+        }
+
+        .circuit-sub-title {
+            font-weight: 700;
+            letter-spacing: 0.24em;
+            text-transform: uppercase;
+            font-size: clamp(0.52rem, 1.2vh, 0.85rem);
+            color: #e0f2fe;
+            margin-top: 2px;
+        }
+
+        .treasure-strip {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 8px;
+            padding: clamp(3px, 0.6vh, 6px) 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 12px rgba(7, 36, 72, 0.25);
+        }
+
+        .treasure-strip-text {
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            font-size: clamp(0.9rem, 2.3vh, 1.65rem);
+            color: #0b3969;
+            line-height: 1.05;
+        }
+
+        .banner-subtitle {
+            width: 96%;
+            margin: 0 auto;
+            background: #ffffff;
+            color: #0b3969;
+            font-weight: 800;
+            text-align: center;
+            padding: clamp(4px, 0.7vh, 7px) 10px;
+            border-radius: 999px;
+            font-size: clamp(0.52rem, 1.15vh, 0.8rem);
+            letter-spacing: 0.03em;
+            box-shadow: 0 3px 10px rgba(7, 36, 72, 0.2);
+            border: 1.5px solid #bae6fd;
+        }
+
+        /* =========================================================
+           4. PAPAN 12 KARTU PINK (TEPAT DI BAWAH BANNER)
+           ========================================================= */
+        #board-wrapper {
+            position: relative;
+            z-index: 10;
+            flex: 1 1 auto;
+            width: 100%;
+            padding: clamp(6px, 1.2vh, 14px) 5.2% clamp(6px, 1vh, 12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 0; /* Penting agar grid selalu fit di flex container */
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: clamp(7px, 1.3vh, 14px);
+            width: 100%;
+            height: 100%;
+            perspective: 1400px;
+        }
+
+        /* =========================================================
+           5. DESAIN 3D FLIP CARD WARNA PINK KOSMETIK
+           ========================================================= */
+        .gift-card {
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            position: relative;
+            min-height: 0;
+            min-width: 0;
+        }
+
+        .gift-card:active:not(.flipped) {
+            transform: scale(0.95);
+        }
+
+        .gift-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.68s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform-style: preserve-3d;
+            border-radius: clamp(12px, 1.8vh, 20px);
+            box-shadow: 0 8px 20px rgba(157, 23, 77, 0.35), 0 3px 8px rgba(157, 23, 77, 0.22);
+        }
+
+        .gift-card.flipped .gift-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: clamp(12px, 1.8vh, 20px);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* SISI DEPAN KARTU TERTUTUP: PINK GLOSSY ELEGAN */
+        .card-front {
+            background: linear-gradient(145deg, #ff9ec4 0%, #f45d96 54%, #db2777 100%);
+            border: 2.5px solid rgba(255, 241, 246, 0.95);
+            color: #ffffff;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        }
+
+        .card-front::before {
+            content: '';
+            position: absolute;
+            top: -35%;
+            left: -45%;
+            width: 145%;
+            height: 85%;
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.38) 0%, rgba(255, 255, 255, 0.06) 60%, transparent 100%);
+            transform: rotate(-18deg);
+            pointer-events: none;
+        }
+
+        .card-front::after {
+            content: '';
+            position: absolute;
+            inset: 5px;
+            border: 1.25px solid rgba(255, 228, 240, 0.62);
+            border-radius: clamp(8px, 1.3vh, 14px);
+            pointer-events: none;
+        }
+
+        .card-gift-svg {
+            width: clamp(16px, 2.2vh, 24px);
+            height: clamp(16px, 2.2vh, 24px);
+            margin-bottom: 2px;
+            filter: drop-shadow(0 2px 4px rgba(131, 24, 67, 0.35));
+            position: relative;
+            z-index: 2;
+        }
+
+        .card-number {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(1.35rem, 3.2vh, 2.4rem);
+            font-weight: 700;
+            line-height: 1;
+            text-shadow: 0 3px 10px rgba(131, 24, 67, 0.45);
+            position: relative;
+            z-index: 2;
+        }
+
+        .card-tap-pill {
+            position: relative;
+            z-index: 2;
+            margin-top: 4px;
+            padding: 2px 9px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.48);
+            font-size: clamp(0.5rem, 1vh, 0.68rem);
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        /* SISI BELAKANG KARTU TERBUKA: HADIAH PRODUK */
+        .card-back {
+            background: linear-gradient(180deg, #ffffff 0%, #fff1f6 100%);
+            border: 2.5px solid #f472b6;
+            transform: rotateY(180deg);
+            padding: 6px;
+            justify-content: space-between;
+        }
+
+        .card-back img {
+            width: 100%;
+            height: 70%;
+            object-fit: contain;
+            border-radius: 10px;
+            background: linear-gradient(180deg, #fff5f8 0%, #ffffff 100%);
+            padding: 2px;
+        }
+
+        .card-back-title {
+            width: 100%;
+            height: 28%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(0.6rem, 1.25vh, 0.86rem);
+            font-weight: 800;
+            color: #9d174d;
+            line-height: 1.12;
+            padding: 0 3px;
+            text-align: center;
+        }
+
+        /* =========================================================
+           6. FOOTER KONTROL SPG DI BAGIAN BAWAH POSTER
+           ========================================================= */
+        #poster-footer {
+            position: relative;
+            z-index: 20;
+            flex: 0 0 auto;
+            width: 100%;
+            padding: clamp(4px, 0.8vh, 8px) 4.5% clamp(8px, 1.4vh, 14px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .stock-pill {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            color: #ffffff;
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-size: clamp(0.68rem, 1.25vh, 0.82rem);
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        .stock-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #f472b6;
+            display: inline-block;
+        }
+
+        .footer-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-new-buyer {
+            background: linear-gradient(135deg, #db2777 0%, #f43f5e 100%);
+            color: #ffffff;
+            border: 1.5px solid rgba(255, 255, 255, 0.7);
+            border-radius: 999px;
+            padding: 6px 13px;
+            font-size: clamp(0.68rem, 1.25vh, 0.82rem);
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 4px 14px rgba(219, 39, 119, 0.45);
+            transition: transform 0.15s ease;
+        }
+
+        .btn-new-buyer:active {
+            transform: scale(0.95);
+        }
+
+        .btn-spg {
+            background: rgba(255, 255, 255, 0.96);
+            color: #be185d;
+            border: 1.5px solid #fbcfe8;
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-size: clamp(0.68rem, 1.25vh, 0.82rem);
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: transform 0.15s ease;
+        }
+
+        .btn-spg:active {
+            transform: scale(0.95);
+        }
+
+        /* =========================================================
+           7. CANVAS CONFETTI MANDIRI & MODAL POP-UP
+           ========================================================= */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 60;
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            background: rgba(9, 13, 28, 0.72);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .modal-backdrop.open {
+            display: flex;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.76); opacity: 0; }
+            75% { transform: scale(1.03); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Pop-Up Hadiah */
+        .prize-dialog {
+            background: #ffffff;
+            border-radius: 26px;
+            max-width: 400px;
+            width: 100%;
+            padding: 26px 22px;
+            text-align: center;
+            border: 4px solid #f9a8d4;
+            box-shadow: 0 24px 54px rgba(0, 0, 0, 0.5);
+            animation: popIn 0.36s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .prize-badge {
+            display: inline-block;
+            background: #fce7f3;
+            color: #be185d;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 6px 14px;
+            border-radius: 999px;
+            margin-bottom: 12px;
+        }
+
+        .prize-img-box {
+            width: 180px;
+            height: 180px;
+            margin: 8px auto 14px;
+            background: linear-gradient(180deg, #fff1f6 0%, #ffffff 100%);
+            border: 2px solid #fbcfe8;
+            border-radius: 20px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .prize-img-box img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .prize-name {
+            font-size: 1.55rem;
+            font-weight: 900;
+            color: #9d174d;
+            margin-bottom: 6px;
+        }
+
+        .prize-desc {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .btn-prize-ok {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #f45d96 0%, #db2777 100%);
+            color: #ffffff;
+            font-size: 1.1rem;
+            font-weight: 900;
+            letter-spacing: 0.06em;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(219, 39, 119, 0.35);
+        }
+
+        .btn-prize-ok:active {
+            transform: scale(0.96);
+        }
+
+        /* =========================================================
+           8. MODAL PENGATURAN STOK & NAMA ITEM SPG (TANPA DELETE)
+           ========================================================= */
+        .spg-dialog {
+            background: #ffffff;
+            border-radius: 24px;
+            max-width: 720px;
+            width: 100%;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 2px solid #fbcfe8;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+            animation: popIn 0.3s ease-out forwards;
+        }
+
+        .spg-header {
+            padding: 16px 20px;
+            background: linear-gradient(135deg, #be185d 0%, #f45d96 100%);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .spg-header h3 {
+            font-size: 1.1rem;
+            font-weight: 800;
+        }
+
+        .spg-header p {
+            font-size: 0.75rem;
+            color: #fce7f3;
+            margin-top: 2px;
+        }
+
+        .btn-close-x {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.22);
+            color: #ffffff;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .spg-body {
+            padding: 16px 20px;
+            overflow-y: auto;
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .spg-tools-card {
+            background: #fdf2f8;
+            border: 1px solid #fbcfe8;
+            border-radius: 16px;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .spg-tools-top {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .spg-tools-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .btn-tool {
+            padding: 7px 12px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: 1px solid #f9a8d4;
+            background: #ffffff;
+            color: #9d174d;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-tool-primary {
+            background: #db2777;
+            color: #ffffff;
+            border-color: #db2777;
+        }
+
+        .spg-list-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .spg-items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(295px, 1fr));
+            gap: 10px;
+        }
+
+        .spg-item-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            background: #ffffff;
+            border: 1.5px solid #fce7f3;
+            border-radius: 14px;
+            padding: 8px 10px;
+        }
+
+        .spg-item-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .spg-num {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #fce7f3;
+            color: #be185d;
+            font-size: 0.72rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .spg-thumb {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            object-fit: contain;
+            background: #fff5f8;
+            border: 1px solid #fbcfe8;
+            flex-shrink: 0;
+        }
+
+        .spg-name-wrap {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .spg-name-input {
+            width: 100%;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #1e293b;
+            background: #fff5f8;
+            border: 1px solid #f9a8d4;
+            border-radius: 8px;
+            padding: 5px 8px;
+            outline: none;
+            user-select: text;
+        }
+
+        .spg-name-input:focus {
+            background: #ffffff;
+            border-color: #db2777;
+        }
+
+        .spg-file-hint {
+            font-size: 0.64rem;
+            color: #94a3b8;
+            font-family: monospace;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 2px;
+        }
+
+        .spg-qty-controls {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .btn-qty {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            border: 1px solid #f9a8d4;
+            background: #fdf2f8;
+            color: #be185d;
+            font-weight: 900;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .btn-qty.plus {
+            background: #db2777;
+            color: #ffffff;
+            border-color: #db2777;
+        }
+
+        .spg-qty-input {
+            width: 44px;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: #1e293b;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 5px 2px;
+            user-select: text;
+        }
+
+        .spg-footer {
+            padding: 14px 20px;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .btn-cancel {
+            padding: 10px 16px;
+            border-radius: 12px;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #475569;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .btn-save {
+            padding: 10px 22px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, #db2777 0%, #f43f5e 100%);
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 0.85rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(219, 39, 119, 0.3);
+        }
+
+        /* Toast Notifikasi */
+        #toast-msg {
+            position: fixed;
+            bottom: 54px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 70;
+            background: rgba(15, 23, 42, 0.92);
+            color: #ffffff;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 9px 18px;
+            border-radius: 999px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+            display: none;
+            white-space: nowrap;
+        }
+
+        /* Empty State saat stok 0 */
+        .empty-board-box {
+            grid-column: 1 / -1;
+            grid-row: 1 / -1;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #fbcfe8;
+            border-radius: 22px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Canvas Confetti Mandiri -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- =========================================================
+         WADAH POSTER UTAMA (RASIO 704:1000)
+         ========================================================= -->
+    <div id="poster-stage">
+
+        <!-- 1. Gambar Background Asli dari Folder Image/ -->
+        <img id="bg-layer"
+             src="Image/background.jpg"
+             alt="Wardah Colour Circuit Background"
+             onload="handleBgLoaded(this)"
+             onerror="handleBgError(this)">
+
+        <!-- 2. Header Poster (Wardah #COLOUR CIRCUIT - PAYDAY GRAND PRIX: TREASURE HUNT) -->
+        <header id="poster-header">
+            <div class="header-top-row">
+                <span class="wardah-logo">Wardah</span>
+                <div class="checkered-badge">
+                    <div class="checkered-flag"></div>
+                    <span style="background:rgba(255,255,255,0.22);border:1px solid rgba(255,255,255,0.5);color:#fff;font-weight:800;font-style:italic;font-size:clamp(0.5rem,1vh,0.72rem);padding:2px 8px;border-radius:999px;">
+                        #COLOUR CIRCUIT
+                    </span>
+                </div>
+            </div>
+
+            <div class="circuit-title-block">
+                <div class="circuit-main-title">COLOUR CIRCUIT</div>
+                <div class="circuit-sub-title">PAYDAY GRAND PRIX</div>
+            </div>
+
+            <div class="treasure-strip">
+                <span class="treasure-strip-text">TREASURE HUNT</span>
+                <span style="color:#db2777;font-weight:900;font-size:clamp(0.9rem,2vh,1.4rem);">&#9873;</span>
+            </div>
+
+            <div class="banner-subtitle">
+                Find The Surprise, Unlock Your Beauty Treat!
+            </div>
+        </header>
+
+        <!-- 3. Papan 12 Kartu Pink (Tepat di bawah tulisan "Find The Surprise, Unlock Your Beauty Treat!") -->
+        <main id="board-wrapper">
+            <div id="cards-grid" class="cards-grid"></div>
+        </main>
+
+        <!-- 4. Bar Kontrol SPG di Bawah Poster -->
+        <footer id="poster-footer">
+            <div class="stock-pill">
+                <span class="stock-dot"></span>
+                <span>Sisa Stok: <strong id="total-stock-badge" style="color:#fbcfe8;">60</strong></span>
+            </div>
+
+            <div class="footer-actions">
+                <button type="button" class="btn-new-buyer" onclick="resetAndShuffleBoard()">
+                    <span>&#8635;</span>
+                    <span>Pembeli Baru</span>
+                </button>
+                <button type="button" class="btn-spg" onclick="openSpgModal()">
+                    <span>&#9881;</span>
+                    <span>Stok</span>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- =========================================================
+         POP-UP HADIAH SAAT KARTU DIPILIH
+         ========================================================= -->
+    <div id="prize-modal" class="modal-backdrop">
+        <div class="prize-dialog">
+            <div class="prize-badge">&#10024; Selamat! Kamu Mendapatkan</div>
+            <div class="prize-img-box">
+                <img id="modal-prize-img" src="" alt="Hadiah Produk">
+            </div>
+            <h2 id="modal-prize-name" class="prize-name">Nama Produk</h2>
+            <p class="prize-desc">
+                Tunjukkan layar ini kepada Beauty Advisor untuk mengambil hadiahmu!
+            </p>
+            <button type="button" class="btn-prize-ok" onclick="closePrizeModal()">OK</button>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         MODAL PENGATURAN STOK & NAMA ITEM SPG (TANPA DELETE)
+         ========================================================= -->
+    <div id="spg-modal" class="modal-backdrop">
+        <div class="spg-dialog">
+            <div class="spg-header">
+                <div>
+                    <h3>Pengaturan Hadiah &amp; Stok</h3>
+                    <p>Ubah nama item atau atur jumlah stok (12 slot tetap &amp; tidak dapat dihapus)</p>
+                </div>
+                <button type="button" class="btn-close-x" onclick="closeSpgModal()">&times;</button>
+            </div>
+
+            <div class="spg-body">
+                <!-- Koneksi Folder Image & Kontrol Suara -->
+                <div class="spg-tools-card">
+                    <div class="spg-tools-top">
+                        <div>
+                            <div style="font-size:0.82rem;font-weight:800;color:#9d174d;">Koneksi Folder "Image" &amp; Suara</div>
+                            <div style="font-size:0.72rem;color:#831843;">
+                                Otomatis membaca <code>Image/&lt;NamaItem&gt;.png</code> &amp; <code>Image/background.jpg</code>
+                            </div>
+                        </div>
+                        <div class="spg-tools-buttons">
+                            <button type="button" class="btn-tool" onclick="toggleSoundMute()">
+                                <span id="sound-label">&#128266; Suara: Aktif</span>
+                            </button>
+                            <label class="btn-tool btn-tool-primary" style="cursor:pointer;">
+                                <span>&#128194; Pilih Folder "Image"</span>
+                                <input type="file" id="folder-picker" webkitdirectory directory multiple accept="image/*" style="display:none;" onchange="handleFolderSelect(event)">
+                            </label>
+                        </div>
+                    </div>
+                    <div id="folder-status-msg" style="font-size:0.72rem;color:#065f46;background:#ecfdf5;border:1px solid #a7f3d0;padding:6px 10px;border-radius:10px;font-weight:600;">
+                        Mode Path Otomatis: Membaca folder <b>Image/</b>
+                    </div>
+                </div>
+
+                <!-- Header Daftar 12 Item -->
+                <div class="spg-list-header">
+                    <span style="font-size:0.85rem;font-weight:800;color:#1e293b;">Daftar 12 Item Hadiah (Edit Nama &amp; Stok)</span>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                        <button type="button" class="btn-tool" onclick="resetTempNamesToDefault()">Reset Nama Default</button>
+                        <button type="button" class="btn-tool" onclick="setAllStock(5)">Set Stok = 5</button>
+                        <button type="button" class="btn-tool" onclick="setAllStock(0)">Nolkan Stok</button>
+                    </div>
+                </div>
+
+                <!-- Grid 12 Item -->
+                <div id="spg-stock-list" class="spg-items-grid"></div>
+            </div>
+
+            <div class="spg-footer">
+                <div style="font-size:0.85rem;font-weight:700;color:#334155;">
+                    Total Stok Tersedia: <strong id="modal-total-stock" style="color:#be185d;font-size:1.05rem;">0</strong> pcs
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button type="button" class="btn-cancel" onclick="closeSpgModal()">Batal</button>
+                    <button type="button" class="btn-save" onclick="saveSpgSettings()">Simpan Perubahan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifikasi -->
+    <div id="toast-msg"></div>
+
+    <script>
+        // ==========================================================
+        // 1. HELPER PENYIMPANAN AMAN (ANTI ERROR DI SANDBOX / IFRAME)
+        // ==========================================================
+        const SafeStorage = {
+            get(key) {
+                try {
+                    return window.localStorage.getItem(key);
+                } catch (e) {
+                    return null;
+                }
+            },
+            set(key, value) {
+                try {
+                    window.localStorage.setItem(key, value);
+                } catch (e) {
+                    // Diabaikan jika berjalan di sandbox iframe tanpa akses localStorage
+                }
+            }
+        };
+
+        // ==========================================================
+        // 2. DATA MASTER 12 PRODUK DEFAULT (PERMANEN, TANPA DELETE)
+        // ==========================================================
+        const DEFAULT_PRODUCT_CATALOG = [
+            { id: 1, name: "Moisturizer", defaultStock: 5 },
+            { id: 2, name: "Foaming Cleanser", defaultStock: 5 },
+            { id: 3, name: "Toner", defaultStock: 5 },
+            { id: 4, name: "Sunscreen", defaultStock: 5 },
+            { id: 5, name: "Micellar Water", defaultStock: 5 },
+            { id: 6, name: "Micellar Pad", defaultStock: 5 },
+            { id: 7, name: "Bounce&Glow", defaultStock: 5 },
+            { id: 8, name: "Pouch Pink", defaultStock: 5 },
+            { id: 9, name: "Foldable Bag", defaultStock: 5 },
+            { id: 10, name: "Velvet Powder Foundation", defaultStock: 5 },
+            { id: 11, name: "Shampoo DSE", defaultStock: 5 },
+            { id: 12, name: "Skin Diary", defaultStock: 5 }
+        ];
+
+        const BG_FALLBACK_LIST = [
+            "Image/background.jpg",
+            "Image/background.png",
+            "Image/background.jpeg",
+            "Image/background.webp",
+            "Image/1000559092.jpg"
+        ];
+
+        let productCatalog = DEFAULT_PRODUCT_CATALOG.map(item => ({ ...item }));
+        let stockData = {};
+        let boardCards = [];
+        let customBlobUrls = {};
+        let isSoundMuted = false;
+
+        // ==========================================================
+        // 3. RESOLUSI GAMBAR & ILUSTRASI SVG FALLBACK PRODUK
+        // ==========================================================
+        function createCosmeticFallbackSvg(productName) {
+            const safeLabel = (productName || "Beauty Treat")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+                <defs>
+                    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#fff1f6"/>
+                        <stop offset="100%" stop-color="#fce7f3"/>
+                    </linearGradient>
+                    <linearGradient id="bottle" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#ff9ec4"/>
+                        <stop offset="100%" stop-color="#db2777"/>
+                    </linearGradient>
+                </defs>
+                <rect width="240" height="240" rx="28" fill="url(#bg)"/>
+                <circle cx="120" cy="105" r="64" fill="#ffffff" opacity="0.75"/>
+                <!-- Ilustrasi Botol Kosmetik -->
+                <rect x="96" y="42" width="48" height="22" rx="6" fill="#be185d"/>
+                <rect x="104" y="64" width="32" height="10" rx="3" fill="#fbcfe8"/>
+                <rect x="84" y="74" width="72" height="86" rx="18" fill="url(#bottle)"/>
+                <rect x="94" y="92" width="52" height="44" rx="8" fill="#ffffff" opacity="0.9"/>
+                <text x="120" y="112" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#9d174d" text-anchor="middle">WARDAH</text>
+                <text x="120" y="126" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="#db2777" text-anchor="middle">BEAUTY</text>
+                <text x="120" y="192" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#9d174d" text-anchor="middle">${safeLabel.slice(0, 22)}</text>
+            </svg>`;
+            return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
+        }
+
+        function getProductImageSrc(productName) {
+            const key = productName.toLowerCase().trim();
+            if (customBlobUrls[key]) {
+                return customBlobUrls[key];
+            }
+            return `Image/${encodeURIComponent(productName)}.png`;
+        }
+
+        function handleProductImgError(imgEl, productName) {
+            const exts = [".jpg", ".jpeg", ".webp"];
+            const attempt = parseInt(imgEl.dataset.attempt || "0", 10);
+
+            if (attempt < exts.length) {
+                imgEl.dataset.attempt = String(attempt + 1);
+                imgEl.src = `Image/${encodeURIComponent(productName)}${exts[attempt]}`;
+            } else {
+                imgEl.onerror = null;
+                imgEl.src = createCosmeticFallbackSvg(productName);
+            }
+        }
+
+        function handleBgLoaded(imgEl) {
+            imgEl.style.display = "block";
+            const stage = document.getElementById("poster-stage");
+            if (stage) stage.classList.add("has-custom-bg");
+        }
+
+        function handleBgError(imgEl) {
+            const attempt = parseInt(imgEl.dataset.attempt || "0", 10);
+            if (attempt + 1 < BG_FALLBACK_LIST.length) {
+                imgEl.dataset.attempt = String(attempt + 1);
+                imgEl.src = BG_FALLBACK_LIST[attempt + 1];
+            } else {
+                imgEl.style.display = "none";
+                const stage = document.getElementById("poster-stage");
+                if (stage) stage.classList.remove("has-custom-bg");
+            }
+        }
+
+        // ==========================================================
+        // 4. EFEK SUARA BENDERING CERIA (WEB AUDIO API MANDIRI)
+        // ==========================================================
+        let audioCtx = null;
+
+        function playCheerfulChime() {
+            if (isSoundMuted) return;
+            try {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContextClass) return;
+                if (!audioCtx) audioCtx = new AudioContextClass();
+                if (audioCtx.state === "suspended") audioCtx.resume();
+
+                const now = audioCtx.currentTime;
+                const notes = [
+                    { freq: 523.25, time: 0.00, dur: 0.24 }, // C5
+                    { freq: 659.25, time: 0.07, dur: 0.24 }, // E5
+                    { freq: 783.99, time: 0.14, dur: 0.24 }, // G5
+                    { freq: 987.77, time: 0.21, dur: 0.28 }, // B5
+                    { freq: 1046.50, time: 0.28, dur: 0.52 }, // C6
+                    { freq: 1318.51, time: 0.36, dur: 0.62 }  // E6
+                ];
+
+                notes.forEach(note => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = "triangle";
+                    osc.frequency.setValueAtTime(note.freq, now + note.time);
+
+                    gain.gain.setValueAtTime(0.001, now + note.time);
+                    gain.gain.exponentialRampToValueAtTime(0.26, now + note.time + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + note.time + note.dur);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + note.time);
+                    osc.stop(now + note.time + note.dur + 0.05);
+                });
+            } catch (e) {
+                // Abaikan jika browser memblokir audio
+            }
+        }
+
+        function toggleSoundMute() {
+            isSoundMuted = !isSoundMuted;
+            SafeStorage.set("cosmetic_promo_muted_v2", isSoundMuted ? "1" : "0");
+            updateSoundButtonUI();
+            showToast(isSoundMuted ? "Suara bendering dimatikan" : "Suara bendering diaktifkan");
+        }
+
+        function updateSoundButtonUI() {
+            const label = document.getElementById("sound-label");
+            if (label) {
+                label.innerHTML = isSoundMuted ? "&#128263; Suara: Nonaktif" : "&#128266; Suara: Aktif";
+            }
+        }
+
+        // ==========================================================
+        // 5. EFEK CONFETTI HTML5 CANVAS MANDIRI (TANPA CDN)
+        // ==========================================================
+        let confettiParticles = [];
+        let confettiAnimId = null;
+
+        function triggerCelebrationConfetti() {
+            const canvas = document.getElementById("confetti-canvas");
+            if (!canvas) return;
+            const ctx = canvas.getContext("2d");
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const colors = ["#ff9ec4", "#f45d96", "#db2777", "#fde047", "#38bdf8", "#a78bfa", "#34d399"];
+            for (let i = 0; i < 110; i++) {
+                const fromLeft = i % 2 === 0;
+                confettiParticles.push({
+                    x: fromLeft ? canvas.width * 0.25 : canvas.width * 0.75,
+                    y: canvas.height * 0.55,
+                    vx: (Math.random() - 0.5) * 14 + (fromLeft ? 3 : -3),
+                    vy: -Math.random() * 14 - 5,
+                    size: Math.random() * 8 + 5,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    rotation: Math.random() * 360,
+                    rotSpeed: (Math.random() - 0.5) * 12,
+                    gravity: 0.36,
+                    alpha: 1
+                });
+            }
+
+            if (!confettiAnimId) {
+                animateConfetti();
+            }
+        }
+
+        function animateConfetti() {
+            const canvas = document.getElementById("confetti-canvas");
+            if (!canvas) return;
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            confettiParticles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += p.gravity;
+                p.rotation += p.rotSpeed;
+                p.alpha -= 0.008;
+
+                if (p.alpha > 0) {
+                    ctx.save();
+                    ctx.globalAlpha = p.alpha;
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate((p.rotation * Math.PI) / 180);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+                    ctx.restore();
+                }
+            });
+
+            confettiParticles = confettiParticles.filter(p => p.alpha > 0 && p.y < canvas.height + 30);
+
+            if (confettiParticles.length > 0) {
+                confettiAnimId = requestAnimationFrame(animateConfetti);
+            } else {
+                confettiAnimId = null;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        // ==========================================================
+        // 6. MANAJEMEN STOK & PAPAN 12 KARTU PINK
+        // ==========================================================
+        function initStorage() {
+            const savedCatalog = SafeStorage.get("cosmetic_promo_catalog_v2");
+            let parsedNames = {};
+            if (savedCatalog) {
+                try {
+                    const arr = JSON.parse(savedCatalog);
+                    if (Array.isArray(arr)) {
+                        arr.forEach(item => {
+                            if (item && typeof item.id === "number" && typeof item.name === "string" && item.name.trim() !== "") {
+                                parsedNames[item.id] = item.name.trim();
+                            }
+                        });
+                    }
+                } catch (e) {}
+            }
+
+            productCatalog = DEFAULT_PRODUCT_CATALOG.map(def => ({
+                id: def.id,
+                name: parsedNames[def.id] || def.name,
+                defaultStock: def.defaultStock
+            }));
+
+            const savedStock = SafeStorage.get("cosmetic_promo_stock_v2");
+            if (savedStock) {
+                try {
+                    stockData = JSON.parse(savedStock);
+                } catch (e) {
+                    stockData = {};
+                }
+            }
+
+            productCatalog.forEach(item => {
+                if (typeof stockData[item.id] !== "number") {
+                    stockData[item.id] = item.defaultStock;
+                }
+            });
+
+            isSoundMuted = SafeStorage.get("cosmetic_promo_muted_v2") === "1";
+            updateSoundButtonUI();
+            saveStockToLocal();
+        }
+
+        function saveCatalogToLocal() {
+            const minimal = productCatalog.map(item => ({ id: item.id, name: item.name }));
+            SafeStorage.set("cosmetic_promo_catalog_v2", JSON.stringify(minimal));
+        }
+
+        function saveStockToLocal() {
+            SafeStorage.set("cosmetic_promo_stock_v2", JSON.stringify(stockData));
+            updateTotalStockDisplay();
+        }
+
+        function getTotalStock() {
+            return Object.values(stockData).reduce((sum, val) => sum + (val > 0 ? val : 0), 0);
+        }
+
+        function updateTotalStockDisplay() {
+            const badge = document.getElementById("total-stock-badge");
+            if (badge) badge.textContent = String(getTotalStock());
+        }
+
+        function generateShuffledBoard() {
+            const availableProducts = productCatalog.filter(p => (stockData[p.id] || 0) > 0);
+
+            if (availableProducts.length === 0) {
+                boardCards = [];
+                renderBoard();
+                return;
+            }
+
+            let pool = [];
+            let tempStock = { ...stockData };
+
+            while (pool.length < 12) {
+                let addedInRound = false;
+                const shuffledCatalog = [...productCatalog].sort(() => Math.random() - 0.5);
+                for (const prod of shuffledCatalog) {
+                    if (pool.length < 12 && (tempStock[prod.id] || 0) > 0) {
+                        pool.push({
+                            productId: prod.id,
+                            name: prod.name,
+                            isFlipped: false
+                        });
+                        tempStock[prod.id]--;
+                        addedInRound = true;
+                    }
+                }
+                if (!addedInRound) break;
+            }
+
+            // Acak Fisher-Yates
+            for (let i = pool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pool[i], pool[j]] = [pool[j], pool[i]];
+            }
+
+            boardCards = pool;
+            renderBoard();
+        }
+
+        function renderBoard() {
+            const grid = document.getElementById("cards-grid");
+            if (!grid) return;
+            grid.innerHTML = "";
+
+            if (boardCards.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-board-box">
+                        <div style="font-size:2.2rem;">&#127873;</div>
+                        <h3 style="font-size:1.1rem;font-weight:900;color:#9d174d;">Stok Hadiah Sedang Kosong</h3>
+                        <p style="font-size:0.8rem;color:#475569;">Tekan tombol <b>Stok BA</b> di bawah untuk mengisi ulang stok hadiah.</p>
+                        <button type="button" class="btn-new-buyer" style="margin-top:6px;padding:10px 18px;" onclick="openSpgModal()">
+                            Buka Pengaturan Stok
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            const giftIconSvg = `<svg class="card-gift-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 12 20 22 4 22 4 12"></polyline>
+                <rect x="2" y="7" width="20" height="5"></rect>
+                <line x1="12" y1="22" x2="12" y2="7"></line>
+                <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path>
+                <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>
+            </svg>`;
+
+            boardCards.forEach((card, index) => {
+                const cardEl = document.createElement("div");
+                cardEl.className = `gift-card ${card.isFlipped ? "flipped" : ""}`;
+                cardEl.dataset.index = String(index);
+
+                const imgSrc = getProductImageSrc(card.name);
+                const safeAttrName = card.name.replace(/"/g, "&quot;");
+
+                cardEl.innerHTML = `
+                    <div class="gift-card-inner">
+                        <div class="card-front">
+                            ${giftIconSvg}
+                            <div class="card-number">${index + 1}</div>
+                            <div class="card-tap-pill">Tap Buka</div>
+                        </div>
+                        <div class="card-back">
+                            <img src="${imgSrc}" alt="${safeAttrName}" data-attempt="0">
+                            <div class="card-back-title">${card.name}</div>
+                        </div>
+                    </div>
+                `;
+
+                const imgEl = cardEl.querySelector(".card-back img");
+                if (imgEl) {
+                    imgEl.onerror = function () {
+                        handleProductImgError(this, card.name);
+                    };
+                }
+
+                cardEl.addEventListener("click", () => handleCardClick(index));
+                grid.appendChild(cardEl);
+            });
+        }
+
+        // ==========================================================
+        // 7. INTERAKSI PEMILIHAN KARTU & PEMBARUAN PEMBELI BARU
+        // ==========================================================
+        function handleCardClick(index) {
+            const card = boardCards[index];
+            if (!card || card.isFlipped) return;
+
+            if ((stockData[card.productId] || 0) <= 0) {
+                const fallbackProd = productCatalog.find(p => (stockData[p.id] || 0) > 0);
+                if (!fallbackProd) {
+                    showToast("Maaf, semua stok hadiah sudah habis!");
+                    return;
+                }
+                card.productId = fallbackProd.id;
+                card.name = fallbackProd.name;
+
+                const cardDom = document.querySelector(`.gift-card[data-index="${index}"]`);
+                if (cardDom) {
+                    const imgEl = cardDom.querySelector(".card-back img");
+                    const titleEl = cardDom.querySelector(".card-back-title");
+                    if (imgEl) {
+                        imgEl.dataset.attempt = "0";
+                        imgEl.onerror = function () { handleProductImgError(this, card.name); };
+                        imgEl.src = getProductImageSrc(card.name);
+                    }
+                    if (titleEl) titleEl.textContent = card.name;
+                }
+            }
+
+            card.isFlipped = true;
+            stockData[card.productId] = Math.max(0, (stockData[card.productId] || 0) - 1);
+            saveStockToLocal();
+
+            const cardElement = document.querySelector(`.gift-card[data-index="${index}"]`);
+            if (cardElement) {
+                cardElement.classList.add("flipped");
+            }
+
+            playCheerfulChime();
+            triggerCelebrationConfetti();
+
+            setTimeout(() => {
+                showPrizeModal(card.name);
+            }, 380);
+        }
+
+        function showPrizeModal(productName) {
+            const modal = document.getElementById("prize-modal");
+            const imgEl = document.getElementById("modal-prize-img");
+            const nameEl = document.getElementById("modal-prize-name");
+
+            imgEl.dataset.attempt = "0";
+            imgEl.onerror = function () {
+                handleProductImgError(this, productName);
+            };
+            imgEl.src = getProductImageSrc(productName);
+            nameEl.textContent = productName;
+
+            modal.classList.add("open");
+        }
+
+        function closePrizeModal() {
+            document.getElementById("prize-modal").classList.remove("open");
+        }
+
+        function resetAndShuffleBoard() {
+            const openedCount = boardCards.filter(c => c.isFlipped).length;
+            boardCards.forEach(c => { c.isFlipped = false; });
+            renderBoard();
+
+            setTimeout(() => {
+                generateShuffledBoard();
+                showToast(openedCount > 0 ? "Kartu ditutup & diacak untuk Pembeli Baru!" : "Posisi hadiah telah diacak ulang!");
+            }, openedCount > 0 ? 320 : 50);
+        }
+
+        // ==========================================================
+        // 8. MODAL PENGATURAN SPG (EDIT NAMA & STOK, TANPA DELETE)
+        // ==========================================================
+        let tempSpgStock = {};
+        let tempSpgNames = {};
+
+        function openSpgModal() {
+            tempSpgStock = { ...stockData };
+            tempSpgNames = {};
+            productCatalog.forEach(item => {
+                tempSpgNames[item.id] = item.name;
+            });
+
+            renderSpgStockList();
+            updateModalTotalStock();
+            updateSoundButtonUI();
+            document.getElementById("spg-modal").classList.add("open");
+        }
+
+        function closeSpgModal() {
+            document.getElementById("spg-modal").classList.remove("open");
+        }
+
+        function renderSpgStockList() {
+            const listContainer = document.getElementById("spg-stock-list");
+            if (!listContainer) return;
+            listContainer.innerHTML = "";
+
+            productCatalog.forEach((item, idx) => {
+                const count = tempSpgStock[item.id] || 0;
+                const currentName = tempSpgNames[item.id] !== undefined ? tempSpgNames[item.id] : item.name;
+                const imgSrc = getProductImageSrc(currentName || item.name);
+
+                const row = document.createElement("div");
+                row.className = "spg-item-row";
+                row.innerHTML = `
+                    <div class="spg-item-left">
+                        <span class="spg-num">${idx + 1}</span>
+                        <img id="spg-preview-img-${item.id}" class="spg-thumb" src="${imgSrc}" alt="${currentName.replace(/"/g, "&quot;")}" data-attempt="0">
+                        <div class="spg-name-wrap">
+                            <input type="text"
+                                   id="name-input-${item.id}"
+                                   class="spg-name-input"
+                                   value="${currentName.replace(/"/g, "&quot;")}"
+                                   placeholder="Nama Item ${idx + 1}">
+                            <div id="spg-file-hint-${item.id}" class="spg-file-hint">Image/${currentName || item.name}.png</div>
+                        </div>
+                    </div>
+                    <div class="spg-qty-controls">
+                        <button type="button" class="btn-qty" onclick="adjustTempStock(${item.id}, -1)">-</button>
+                        <input type="number" min="0" max="999" id="stock-input-${item.id}" class="spg-qty-input" value="${count}">
+                        <button type="button" class="btn-qty plus" onclick="adjustTempStock(${item.id}, 1)">+</button>
+                    </div>
+                `;
+
+                const thumb = row.querySelector(`#spg-preview-img-${item.id}`);
+                if (thumb) {
+                    thumb.onerror = function () {
+                        handleProductImgError(this, currentName || item.name);
+                    };
+                }
+
+                const nameInput = row.querySelector(`#name-input-${item.id}`);
+                if (nameInput) {
+                    nameInput.addEventListener("input", (e) => handleTempNameChange(item.id, e.target.value));
+                }
+
+                const qtyInput = row.querySelector(`#stock-input-${item.id}`);
+                if (qtyInput) {
+                    qtyInput.addEventListener("change", (e) => manualTempStock(item.id, e.target.value));
+                }
+
+                listContainer.appendChild(row);
+            });
+        }
+
+        function handleTempNameChange(id, rawValue) {
+            tempSpgNames[id] = rawValue;
+            const trimmed = rawValue.trim();
+            const defaultItem = DEFAULT_PRODUCT_CATALOG.find(d => d.id === id);
+            const effectiveName = trimmed || (defaultItem ? defaultItem.name : `Item ${id}`);
+
+            const hintEl = document.getElementById(`spg-file-hint-${id}`);
+            if (hintEl) hintEl.textContent = `Image/${effectiveName}.png`;
+
+            const previewImg = document.getElementById(`spg-preview-img-${id}`);
+            if (previewImg) {
+                previewImg.dataset.attempt = "0";
+                previewImg.onerror = function () {
+                    handleProductImgError(this, effectiveName);
+                };
+                previewImg.src = getProductImageSrc(effectiveName);
+            }
+        }
+
+        function resetTempNamesToDefault() {
+            DEFAULT_PRODUCT_CATALOG.forEach(def => {
+                tempSpgNames[def.id] = def.name;
+                const input = document.getElementById(`name-input-${def.id}`);
+                if (input) input.value = def.name;
+                handleTempNameChange(def.id, def.name);
+            });
+            showToast("Nama 12 item dikembalikan ke default (tekan Simpan Perubahan)");
+        }
+
+        function adjustTempStock(id, delta) {
+            const next = Math.max(0, (tempSpgStock[id] || 0) + delta);
+            tempSpgStock[id] = next;
+            const input = document.getElementById(`stock-input-${id}`);
+            if (input) input.value = String(next);
+            updateModalTotalStock();
+        }
+
+        function manualTempStock(id, val) {
+            tempSpgStock[id] = Math.max(0, parseInt(val, 10) || 0);
+            updateModalTotalStock();
+        }
+
+        function setAllStock(amount) {
+            productCatalog.forEach(item => {
+                tempSpgStock[item.id] = amount;
+                const input = document.getElementById(`stock-input-${item.id}`);
+                if (input) input.value = String(amount);
+            });
+            updateModalTotalStock();
+        }
+
+        function updateModalTotalStock() {
+            const total = Object.values(tempSpgStock).reduce((sum, v) => sum + (v > 0 ? v : 0), 0);
+            const el = document.getElementById("modal-total-stock");
+            if (el) el.textContent = String(total);
+        }
+
+        function saveSpgSettings() {
+            for (const item of productCatalog) {
+                const candidate = (tempSpgNames[item.id] || "").trim();
+                if (!candidate) {
+                    showToast(`Nama item #${item.id} tidak boleh kosong!`);
+                    const inputEl = document.getElementById(`name-input-${item.id}`);
+                    if (inputEl) inputEl.focus();
+                    return;
+                }
+            }
+
+            productCatalog = productCatalog.map(item => ({
+                ...item,
+                name: tempSpgNames[item.id].trim()
+            }));
+            saveCatalogToLocal();
+
+            stockData = { ...tempSpgStock };
+            saveStockToLocal();
+
+            closeSpgModal();
+            generateShuffledBoard();
+            showToast("Nama & stok SPG tersimpan, papan telah diacak!");
+        }
+
+        function handleFolderSelect(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
+
+            let loadedCount = 0;
+            Array.from(files).forEach(file => {
+                if (!file.type.startsWith("image/")) return;
+                const nameWithoutExt = file.name.replace(/\.[^/.]+$/, "").toLowerCase().trim();
+                const blobUrl = URL.createObjectURL(file);
+
+                if (nameWithoutExt === "background" || nameWithoutExt === "1000559092") {
+                    const bgImg = document.getElementById("bg-layer");
+                    if (bgImg) bgImg.src = blobUrl;
+                    loadedCount++;
+                } else {
+                    customBlobUrls[nameWithoutExt] = blobUrl;
+                    loadedCount++;
+                }
+            });
+
+            const statusMsg = document.getElementById("folder-status-msg");
+            if (statusMsg) {
+                statusMsg.innerHTML = `Berhasil memuat <b>${loadedCount} gambar</b> dari folder lokal!`;
+            }
+            renderSpgStockList();
+            renderBoard();
+            showToast(`${loadedCount} gambar dari folder berhasil dimuat!`);
+        }
+
+        // ==========================================================
+        // 9. TOAST NOTIFIKASI & INISIALISASI LANGSUNG SAAT LOAD
+        // ==========================================================
+        let toastTimeout = null;
+        function showToast(message) {
+            const toast = document.getElementById("toast-msg");
+            if (!toast) return;
+            toast.textContent = message;
+            toast.style.display = "block";
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.style.display = "none";
+            }, 2600);
+        }
+
+        function bootApp() {
+            initStorage();
+            updateTotalStockDisplay();
+            generateShuffledBoard();
+        }
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", bootApp);
+        } else {
+            bootApp();
+        }
+    </script>
+</body>
+</html>
